@@ -1,10 +1,14 @@
 <script setup>
 import { ref } from 'vue'
 import SparkMD5 from 'spark-md5'
+import DisplayTool from './DisplayTool.vue'
 
 const uploadRef = ref(null)
 const selectFile = ref(null)
 const chunkSize = ref(2 * 1024 * 1024) // 2MB
+const selectFileSize = ref(null)
+const uploadTime = ref(null)
+const startTime = ref(null)
 const uploadedChunks = ref([])
 const fileHash = ref('')
 
@@ -13,6 +17,8 @@ const fileHash = ref('')
 function handleChange(file) {
     selectFile.value = file.raw
     console.log('handleChange', selectFile.value)
+    selectFileSize.value = selectFile.value.size
+    uploadTime.value = null
     calculateHash(selectFile.value)
 }
 
@@ -47,6 +53,7 @@ function calculateHash(file) {
 }
 
 async function uploadFile() {
+    startTime.value = performance.now()
     const chunkCount = Math.ceil(selectFile.value.size / chunkSize.value)
     // 通过文件名加hash, 返回文件是否已经存在切片索引, hash是保证文件的正确性
     const uploadedChunkResponse = await fetch(`http://localhost:3030/qryChunkExist?fileName=${selectFile.value.name}&hash=${fileHash.value}`)
@@ -83,7 +90,10 @@ async function uploadChunk(formData) {
         if (result.type === 'success') {
             console.log('上传成功：', result)
             selectFile.value = null
-            uploadRef.value && uploadRef.value.clearFiles()
+            uploadTime.value = performance.now() - startTime.value
+            if (uploadRef.value) {
+                uploadRef.value.clearFiles()
+            }
         }
     }
     catch (error) {
@@ -109,5 +119,6 @@ function submitUpload() {
                 上传
             </el-button>
         </el-upload>
+        <DisplayTool v-if="selectFileSize || uploadTime" :file-size="selectFileSize" :upload-time="uploadTime" />
     </div>
 </template>

@@ -1,15 +1,21 @@
 <script setup>
 import { ref } from 'vue'
+import DisplayTool from './DisplayTool.vue'
 
 const uploadRef = ref(null)
 const selectFile = ref(null)
+const selectFileSize = ref(null)
+const uploadTime = ref(null)
 
 function handleChange(file) {
     selectFile.value = file.raw
     console.log('handleChange', selectFile.value)
+    selectFileSize.value = selectFile.value.size
+    uploadTime.value = null
 }
 
 function uploadFile() {
+    const startTime = performance.now()
     const formData = new FormData()
     formData.append('fileName', selectFile.value.name)
     formData.append('file', selectFile.value)
@@ -23,7 +29,11 @@ function uploadFile() {
         }).then((resp) => {
             console.log(resp.message)
             selectFile.value = null
-            uploadRef.value && uploadRef.value.clearFiles()
+            if (uploadRef.value) {
+                uploadRef.value.clearFiles()
+            }
+            const endTime = performance.now()
+            uploadTime.value = endTime - startTime
         })
     }
     catch (error) {
@@ -45,6 +55,7 @@ function uploadFile() {
                 上传
             </el-button>
         </el-upload>
+        <DisplayTool v-if="selectFileSize || uploadTime" :file-size="selectFileSize" :upload-time="uploadTime" />
     </div>
 </template>
 

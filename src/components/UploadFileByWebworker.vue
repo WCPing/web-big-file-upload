@@ -1,18 +1,24 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { handleEvent, sliceFile, uploadFile } from '../utils/fileUtil.js'
+import DisplayTool from './DisplayTool.vue'
 
 const uploadRef = ref(null)
 const selectFile = ref(null)
+const selectFileSize = ref(null)
+const uploadTime = ref(null)
+const startTime = ref(null)
 const progress = ref(0)
 
 function handleChange(file) {
     selectFile.value = file.raw
     console.log('handleChange', selectFile.value)
+    selectFileSize.value = selectFile.value.size
+    uploadTime.value = null
 }
 
 async function submitUpload() {
-    console.time()
+    startTime.value = performance.now()
 
     sliceFile(selectFile.value).then(({ chunks, chunkCount }) => {
         uploadFile(chunks)
@@ -23,9 +29,12 @@ async function submitUpload() {
             progress.value = schedule / chunkCount
 
             if (schedule === chunkCount) { // 上传完成，关闭事件监听
-                selectFile.value = null
-                uploadRef.value && uploadRef.value.clearFiles()
                 removeListener()
+                selectFile.value = null
+                uploadTime.value = performance.now() - startTime.value
+                if (uploadRef.value) {
+                    uploadRef.value.clearFiles()
+                }
             }
         })
     })
@@ -47,6 +56,7 @@ async function submitUpload() {
                 上传
             </el-button>
         </el-upload>
+        <DisplayTool v-if="selectFileSize || uploadTime" :file-size="selectFileSize" :upload-time="uploadTime" />
         <p>进度：{{ progress * 100 }}%</p>
     </div>
 </template>

@@ -13,3 +13,11 @@ export function createEventHandler(eventName) {
         dispatch,
     }
 }
+
+export function convertFileSize(size) {
+    return (size / (1024 * 1024)).toFixed(2)
+}
+
+export function convertTime(time) {
+    return (time / 1000).toFixed(2)
+}

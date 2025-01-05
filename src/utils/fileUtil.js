@@ -1,4 +1,4 @@
-import { createEventHandler } from './eventHandle'
+import { createEventHandler } from './common'
 import FileWorker from './fileChunk.worker.js?worker'
 
 export const getConcurrency = () => navigator.hardwareConcurrency || 4

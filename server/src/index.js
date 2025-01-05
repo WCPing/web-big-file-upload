@@ -124,6 +124,11 @@ app.post('/upload-monitor', (req, res) => {
     res.send({ message: 'OK' })
 })
 
+// app.post('/upload-monitor', (req, res) => {
+//     console.log(req.body)
+//     res.send({ message: 'OK' })
+// })
+
 // 解析req.body中的内容
 app.use(express.json())
 

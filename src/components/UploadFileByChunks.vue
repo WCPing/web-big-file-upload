@@ -1,18 +1,25 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
+import DisplayTool from './DisplayTool.vue'
 
 const uploadRef = ref(null)
 const selectFile = ref(null)
 const chunkSize = ref(2 * 1024 * 1024) // 2MB
+const selectFileSize = ref(null)
+const uploadTime = ref(null)
+const startTime = ref(null)
 
 // fileName文件夹 - 0.chunk
 
 function handleChange(file) {
     selectFile.value = file.raw
     console.log('handleChange', selectFile.value)
+    selectFileSize.value = selectFile.value.size
+    uploadTime.value = null
 }
 
 async function uploadFile() {
+    startTime.value = performance.now()
     const chunkCount = Math.ceil(selectFile.value.size / chunkSize.value)
 
     for (let i = 0; i < chunkCount; i++) {
@@ -36,8 +43,11 @@ async function uploadChunk(formData) {
         const result = await response.json()
         if (result.type === 'success') {
             console.log('上传成功：', result)
+            uploadTime.value = performance.now() - startTime.value
             selectFile.value = null
-            uploadRef.value && uploadRef.value.clearFiles()
+            if (uploadRef.value) {
+                uploadRef.value.clearFiles()
+            }
         }
     }
     catch (error) {
@@ -63,5 +73,6 @@ function submitUpload() {
                 上传
             </el-button>
         </el-upload>
+        <DisplayTool v-if="selectFileSize || uploadTime" :file-size="selectFileSize" :upload-time="uploadTime" />
     </div>
 </template>
