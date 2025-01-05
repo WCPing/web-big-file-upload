@@ -1,0 +1,20 @@
+{
+    "name": "web-file-upload-server",
+    "version": "1.0.0",
+    "description": "web file upload server",
+    "author": "",
+    "license": "ISC",
+    "keywords": [],
+    "main": "index.js",
+    "scripts": {
+        "server": "nodemon ./src/index.js"
+    },
+    "dependencies": {
+        "cors": "2.8.5",
+        "express": "4.19.2",
+        "multer": "1.4.5-lts.1"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.9"
+    }
+}
